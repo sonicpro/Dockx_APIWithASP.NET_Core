@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
+using Newtonsoft.Json.Serialization;
 
 namespace CityInfo.API
 {
@@ -17,6 +18,15 @@ namespace CityInfo.API
 			// Setting the pre-2.2 version to prevent returning ProblemDetails instances for error status codes.
 			// We are going to use UseStatusCodePages middleware instead.
 			services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+				//.AddJsonOptions(o =>
+				//{
+				//	// We do not want the serialized properties start with a lower-case letter.
+				//	if (o.SerializerSettings.ContractResolver != null)
+				//	{
+				//		var castedResolver = o.SerializerSettings.ContractResolver as DefaultContractResolver;
+				//		castedResolver.NamingStrategy = null;
+				//	}
+				//});
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
