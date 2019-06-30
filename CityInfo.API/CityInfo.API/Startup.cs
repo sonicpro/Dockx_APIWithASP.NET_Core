@@ -47,6 +47,14 @@ namespace CityInfo.API
 			{
 				loggingBuilder.AddNLog();
 			});
+
+#if DEBUG
+			services.AddTransient<IMailService, LocalMailService>();
+#else
+			// It's no point to build the Release configuration because "CloudMailService" writes to the Debug output window.
+			// "Debug.WriteLine()" statements are dropped out from the release build.
+			services.AddTransient<IMailService, CloudMailService>();
+#endif
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

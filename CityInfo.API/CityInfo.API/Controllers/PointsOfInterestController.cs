@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using System.Linq;
 using CityInfo.API.Models;
 using System;
+using CityInfo.API.Services;
 
 namespace CityInfo.API.Controllers
 {
@@ -13,10 +14,12 @@ namespace CityInfo.API.Controllers
 	{
 		// ILogger<T> uses T class Name as a logging message Category.
 		private readonly ILogger<PointsOfInterestController> logger;
+		private readonly IMailService mailService;
 
-		public PointsOfInterestController(ILogger<PointsOfInterestController> logger)
+		public PointsOfInterestController(ILogger<PointsOfInterestController> logger, IMailService mailService)
 		{
 			this.logger = logger;
+			this.mailService = mailService;
 		}
 
 		[HttpGet("{cityId}/pointsofinterest")]
@@ -216,6 +219,9 @@ namespace CityInfo.API.Controllers
 			}
 
 			city.PointsOfInterest.Remove(pointOfInterestToDelete);
+			mailService.Send("Point of interest deleted.",
+				$"Point of interest {pointOfInterestToDelete} with id {pointOfInterestToDelete.Id} was deleted.");
+
 			return NoContent();
 		}
 	}
