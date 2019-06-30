@@ -11,6 +11,7 @@ namespace CityInfo.API.Controllers
 	[ApiController]
 	public class PointsOfInterestController : ControllerBase
 	{
+		// ILogger<T> uses T class Name as a logging message Category.
 		private readonly ILogger<PointsOfInterestController> logger;
 
 		public PointsOfInterestController(ILogger<PointsOfInterestController> logger)
