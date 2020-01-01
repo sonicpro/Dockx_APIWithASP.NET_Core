@@ -1,9 +1,9 @@
-﻿using Microsoft.AspNetCore.JsonPatch;
+﻿using System;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System.Linq;
 using CityInfo.API.Models;
-using System;
 using CityInfo.API.Services;
 
 namespace CityInfo.API.Controllers
@@ -72,16 +72,6 @@ namespace CityInfo.API.Controllers
 			if (pointOfInterest == null)
 			{
 				return BadRequest();
-			}
-
-			if (pointOfInterest.Name == pointOfInterest.Description)
-			{
-				ModelState.AddModelError("Description", "The provided description cannot be the same as the name.");
-			}
-
-			if (!ModelState.IsValid)
-			{
-				return BadRequest(ModelState);
 			}
 
 			var city = CitiesDataStore.Current.Cities.FirstOrDefault(c => c.Id == cityId);

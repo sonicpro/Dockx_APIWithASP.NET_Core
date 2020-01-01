@@ -1,4 +1,6 @@
-﻿using CityInfo.API.Services;
+﻿using CityInfo.API.Filters;
+using CityInfo.API.Services;
+using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -40,8 +42,13 @@ namespace CityInfo.API
 				//		castedResolver.NamingStrategy = null;
 				//	}
 				//});
-				.AddMvcOptions(o => o.OutputFormatters.Add(new XmlDataContractSerializerOutputFormatter())
-				);
+				.AddMvcOptions(o =>
+                {
+                    o.OutputFormatters.Add(new XmlDataContractSerializerOutputFormatter());
+                    o.AllowEmptyInputInBodyModelBinding = true; // To make it possible to handle null [FromBody] model values ourselves.
+                    o.Filters.Add<ValidationFilter>();
+                })
+                .AddFluentValidation(mvcConfiguration => mvcConfiguration.RegisterValidatorsFromAssemblyContaining<Startup>());
 
 			services.AddLogging(loggingBuilder =>
 			{
