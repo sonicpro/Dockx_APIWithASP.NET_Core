@@ -7,13 +7,13 @@ namespace CityInfo.API.Controllers
 	[Route("api/cities")]
 	public class CitiesController : ControllerBase
 	{
-		[HttpGet("api/cities", Name = "CityInfoApi_CityList")]
+		[HttpGet()]
 		public IActionResult GetCities()
 		{
 			return Ok(CitiesDataStore.Current.Cities);
 		}
 
-		[HttpGet("{id}", Name = "CityInfoApi_City")]
+		[HttpGet("{id}")]
 		public IActionResult GetCity(int id)
 		{
 			var cityToReturn = CitiesDataStore.Current.Cities.FirstOrDefault(c => c.Id == id);
