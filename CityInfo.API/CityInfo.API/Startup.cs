@@ -2,23 +2,26 @@
 using CityInfo.API.Services;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json.Serialization;
 using NLog.Extensions.Logging;
+using System.Net;
 
 namespace CityInfo.API
 {
 	public class Startup
 	{
-		public IConfiguration Configuration { get; }
+		public static IConfiguration Configuration { get; private set; }
 
 		public Startup(IConfiguration configuration)
 		{
-			Configuration = configuration;
+			Startup.Configuration = configuration;
 		}
 
 		// This method gets called by the runtime. Use this method to add services to the container.
@@ -26,9 +29,12 @@ namespace CityInfo.API
 		public void ConfigureServices(IServiceCollection services)
 		{
 			// The following three lines add the configuration for FolderListerService / ListFolderController (API for testing Bio-Opt. test assignment).
-			IConfigurationSection localFolderOptions = Configuration.GetSection("LocalFolderOptions");
-			services.Configure<LocalFolderOptions>(localFolderOptions);
-			services.AddScoped<FolderListerService>();
+			//IConfigurationSection localFolderOptions = Configuration.GetSection("LocalFolderOptions");
+			//services.Configure<LocalFolderOptions>(localFolderOptions);
+			//services.AddScoped<FolderListerService>();
+
+			//IConfigurationSection mailOptions = Configuration.GetSection("mailSettings");
+			//services.Configure<>
 
 			// Setting the pre-2.2 version to prevent returning ProblemDetails instances for error status codes.
 			// We are going to use UseStatusCodePages middleware instead.
@@ -73,7 +79,21 @@ namespace CityInfo.API
 			}
 			else
 			{
-				app.UseExceptionHandler();
+				app.UseExceptionHandler(
+					options =>
+					{
+						options.Run(async context =>
+						{
+							context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+							context.Response.ContentType = "text/html";
+							var ex = context.Features.Get<IExceptionHandlerFeature>();
+							if (ex != null)
+							{
+								var err = $"<h1>Error: {ex.Error.Message}</h1>{ex.Error.StackTrace}";
+								await context.Response.WriteAsync(err).ConfigureAwait(false);
+							}
+						});
+					});
 			}
 
 			//app.Run((context) =>
