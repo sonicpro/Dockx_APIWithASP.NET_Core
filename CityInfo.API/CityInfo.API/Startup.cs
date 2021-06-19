@@ -1,4 +1,5 @@
-﻿using CityInfo.API.Filters;
+﻿using CityInfo.API.Entities;
+using CityInfo.API.Filters;
 using CityInfo.API.Services;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Builder;
@@ -7,6 +8,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Formatters;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json.Serialization;
@@ -68,10 +70,14 @@ namespace CityInfo.API
 			// "Debug.WriteLine()" statements are dropped out from the release build.
 			services.AddTransient<IMailService, CloudMailService>();
 #endif
+			var connectionString = Startup.Configuration["connectionStrings:cityInfoDBConnectionString"];
+			// UseSqlServer is an extension method located in Microsoft.EntityFrameworkCore namespace.
+			// Defined in Microsoft.EntityFrameworkCore.SqlServer.dll.
+			services.AddDbContext<CityInfoContext>((DbContextOptionsBuilder o) => o.UseSqlServer(connectionString));
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-		public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+		public void Configure(IApplicationBuilder app, IHostingEnvironment env, CityInfoContext context)
 		{
 			if (env.IsDevelopment())
 			{
@@ -80,31 +86,33 @@ namespace CityInfo.API
 			else
 			{
 				app.UseExceptionHandler(
-					options =>
+					appBuilder =>
 					{
-						options.Run(async context =>
+						appBuilder.Run(async httpContext =>
 						{
-							context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
-							context.Response.ContentType = "text/html";
-							var ex = context.Features.Get<IExceptionHandlerFeature>();
+							httpContext.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+							httpContext.Response.ContentType = "text/html";
+							var ex = httpContext.Features.Get<IExceptionHandlerFeature>();
 							if (ex != null)
 							{
 								var err = $"<h1>Error: {ex.Error.Message}</h1>{ex.Error.StackTrace}";
-								await context.Response.WriteAsync(err).ConfigureAwait(false);
+								await httpContext.Response.WriteAsync(err).ConfigureAwait(false);
 							}
 						});
 					});
 			}
 
-			//app.Run((context) =>
+			//app.Run((httpContext) =>
 			//{
 			//	throw new Exception("Example exception.");
 			//});
 
-			//app.Run(async (context) =>
+			//app.Run(async (httpContext) =>
 			//{
-			//	await context.Response.WriteAsync("Hello World!");
+			//	await httpContext.Response.WriteAsync("Hello World!");
 			//});
+
+			context.EnsureSeedDataForContext();
 
 			app.UseStatusCodePages();
 			app.UseMvc();
