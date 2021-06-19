@@ -176,7 +176,8 @@ namespace CityInfo.API.Controllers
 			// Hand-code the validation rules for PointOfInterestForUpdateDto, like mandatory "Name" etc.
 			TryValidateModel(dtoToUpdate);
 
-			if (dtoToUpdate.Name == dtoToUpdate.Description)
+			if (!string.IsNullOrEmpty(dtoToUpdate.Name) && !string.IsNullOrEmpty(dtoToUpdate.Description)
+				&& dtoToUpdate.Name == dtoToUpdate.Description)
 			{
 				ModelState.AddModelError("Description", "The provided description cannot be the same as the name.");
 			}
