@@ -74,6 +74,7 @@ namespace CityInfo.API
 			// UseSqlServer is an extension method located in Microsoft.EntityFrameworkCore namespace.
 			// Defined in Microsoft.EntityFrameworkCore.SqlServer.dll.
 			services.AddDbContext<CityInfoContext>((DbContextOptionsBuilder o) => o.UseSqlServer(connectionString));
+			services.AddScoped<ICityInfoRepository, CityInfoRepository>();
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
