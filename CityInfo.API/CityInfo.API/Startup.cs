@@ -1,5 +1,6 @@
 ﻿using CityInfo.API.Entities;
 using CityInfo.API.Filters;
+using CityInfo.API.Models;
 using CityInfo.API.Services;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Builder;
@@ -75,6 +76,7 @@ namespace CityInfo.API
 			// Defined in Microsoft.EntityFrameworkCore.SqlServer.dll.
 			services.AddDbContext<CityInfoContext>((DbContextOptionsBuilder o) => o.UseSqlServer(connectionString));
 			services.AddScoped<ICityInfoRepository, CityInfoRepository>();
+			services.AddAutoMapper(typeof(CityInfoProfile).Assembly);
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

@@ -6,6 +6,7 @@ using System.Linq;
 using CityInfo.API.Models;
 using CityInfo.API.Services;
 using System.Collections.Generic;
+using AutoMapper;
 
 namespace CityInfo.API.Controllers
 {
@@ -17,12 +18,14 @@ namespace CityInfo.API.Controllers
 		private readonly ILogger<PointsOfInterestController> logger;
 		private readonly IMailService mailService;
 		private readonly ICityInfoRepository repository;
+		private IMapper mapper;
 
-		public PointsOfInterestController(ILogger<PointsOfInterestController> logger, IMailService mailService, ICityInfoRepository repository)
+		public PointsOfInterestController(ILogger<PointsOfInterestController> logger, IMailService mailService, ICityInfoRepository repository, IMapper mapper)
 		{
 			this.logger = logger;
 			this.mailService = mailService;
 			this.repository = repository;
+			this.mapper = mapper;
 		}
 
 		[HttpGet("{cityId}/pointsofinterest")]
@@ -38,14 +41,7 @@ namespace CityInfo.API.Controllers
 				}
 
 				var pointsOfInterest = repository.GetPointsOfInterestForCity(cityId);
-				var pointsOfIntersetForCityResult = new List<PointsOfInterestDto>();
-				foreach (var pi in pointsOfInterest)
-					pointsOfIntersetForCityResult.Add(new PointsOfInterestDto
-					{
-						Id = pi.Id,
-						Name = pi.Name,
-						Description = pi.Description
-					});
+				var pointsOfIntersetForCityResult = mapper.Map<IEnumerable<PointOfInterestDto>>(pointsOfInterest);
 				return Ok(pointsOfIntersetForCityResult);
 			}
 			catch(Exception ex)
@@ -71,12 +67,7 @@ namespace CityInfo.API.Controllers
 				return NotFound();
 			}
 
-			var pointOfInterestResult = new PointsOfInterestDto
-			{
-				Id = pointOfInterest.Id,
-				Name = pointOfInterest.Name,
-				Description = pointOfInterest.Description
-			};
+			var pointOfInterestResult = mapper.Map<PointOfInterestDto>(pointOfInterest);
 
 			return Ok(pointOfInterestResult);
 		}
@@ -101,7 +92,7 @@ namespace CityInfo.API.Controllers
 			var maxPointOfInterest = CitiesDataStore.Current.Cities.SelectMany(c => c.PointsOfInterest)
 				.Max(p => p.Id);
 
-			var finalPointOfInterest = new PointsOfInterestDto
+			var finalPointOfInterest = new PointOfInterestDto
 			{
 				Id = ++maxPointOfInterest,
 				Name = pointOfInterest.Name,
