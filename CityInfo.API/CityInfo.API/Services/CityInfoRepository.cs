@@ -1,4 +1,5 @@
 ﻿using CityInfo.API.Entities;
+using CityInfo.API.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
@@ -42,6 +43,23 @@ namespace CityInfo.API.Services
 		public bool DoesCityExist(int cityId)
 		{
 			return context.Cities.Any(c => c.Id == cityId);
+		}
+
+		public void CreatePointOfInterest(int cityId, PointOfInterest pointOfInterest)
+		{
+			var city = GetCity(cityId, false);
+			city.PointsOfInterest.Add(pointOfInterest);
+			context.SaveChanges();
+		}
+
+		public void DeletePointOfInterest(PointOfInterest pointOfInterestId)
+		{
+			context.PointsOfInterest.Remove(pointOfInterestId);
+		}
+
+		public bool Save()
+		{
+			return context.SaveChanges() >= 0;
 		}
 	}
 }
